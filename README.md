@@ -1,0 +1,2 @@
+# Buffalo Token Auth
+
