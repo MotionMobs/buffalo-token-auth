@@ -1,0 +1,97 @@
+package actions
+
+import (
+	"database/sql"
+	"strings"
+
+	"<%= app.PackagePkg %>/models"
+	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/pop"
+	"github.com/gobuffalo/validate"
+	"github.com/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
+)
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// AuthCreate attempts to log the user in with an existing account.
+func AuthCreate(c buffalo.Context) error {
+	req := &LoginRequest{}
+
+	if err := c.Bind(req); err != nil {
+		return errors.WithStack(err)
+	}
+
+	tx := c.Value("tx").(*pop.Connection)
+	u := &models.User{}
+
+	// setup error function for later use
+	bad := func(msg string) error {
+		verrs := validate.NewErrors()
+		verrs.Add("email", "invalid email/password: "+msg)
+		c.Set("errors", verrs)
+		return c.Error(http.StatusUnprocessableEntity, verrs)
+	}
+
+	// check for empty password before anything else
+	pwd := req.Password
+	if len(pwd) == 0 {
+		return bad("bad password")
+	}
+
+	if err := tx.Where("email = ?", strings.TrimSpace(strings.ToLower(req.Email))).First(u); err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return bad("no user with that email")
+		}
+		return errors.WithStack(err)
+	}
+
+	// compare passwords
+	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(req.Password)); err != nil {
+		return bad("bad password")
+	}
+
+	if err := buildSetToken(c, u); err != nil {
+		return c.Error(http.StatusBadRequest, err)
+	}
+	return c.Render(200, r.Auto(u))
+}
+
+func buildSetToken(c buffalo.Context, u *models.User) error {
+	// check for refresh token
+	tx := c.Value("tx").(*pop.Connection)
+	if u.RefreshToken.UUID == uuid.Nil {
+		u.RefreshToken = nulls.NewUUID(uuid.Must(uuid.NewV4()))
+		verrs, err := u.Update(tx)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		if verrs.HasAny() {
+			return c.Render(400, r.Auto(verrs))
+		}
+	}
+
+	token, err := helpers.BuildJWT(u, 0)
+	if err != nil {
+		return err
+	}
+	helpers.SetToken(c, token)
+	c.Set("current_user", u)
+	return nil
+}
+
+// AuthDestroy clears the session and logs a user out
+func AuthDestroy(c buffalo.Context) error {
+	u := c.Value("current_user").(*models.User)
+	u.RefreshToken.UUID = uuid.Nil
+	u.RefreshToken.Valid = false
+
+	tx := c.Value("tx").(*pop.Connection)
+	tx.Save(u)
+
+	helpers.SetToken(c, "")
+	return c.Render(200, r.Auto("success"))
+}
