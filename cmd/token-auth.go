@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"buffalo-token-auth/tokenauth"
 	"context"
+
+	"mmgitl.mattclark.guru/MM/buffalo-token-auth/tokenauth"
 
 	"github.com/gobuffalo/genny"
 	"github.com/gobuffalo/gogen"

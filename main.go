@@ -1,7 +1,7 @@
 package main
 
 import (
-	"buffalo-token-auth/cmd"
+	"mmgitl.mattclark.guru/MM/buffalo-token-auth/cmd"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module buffalo-token-auth
+module mmgitl.mattclark.guru/MM/buffalo-token-auth
 
 go 1.12
 
