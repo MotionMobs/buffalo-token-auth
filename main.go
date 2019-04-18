@@ -1,6 +1,6 @@
 package main
 
-import "mmgitl.mattclark.guru/buffalo-token-auth/cmd"
+import "mmgitl.mattclark.guru/MM/buffalo-token-auth/cmd"
 
 func main() {
 	cmd.Execute()
