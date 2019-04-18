@@ -2,8 +2,6 @@ create_table("users"){
     t.Column("id", "uuid", {"primary": true})
     t.Column("email", "string", {})
     t.Column("password_hash", "string", {})
-
     <%= for (field) in fields { %> 
-      t.Column("<%= field.Name.Underscore() %>", "<%= field.CommonType() %>", {})
-    <% } %>
+    t.Column("<%= field.Name.Underscore() %>", "<%= field.CommonType() %>", {})<% } %>
 }

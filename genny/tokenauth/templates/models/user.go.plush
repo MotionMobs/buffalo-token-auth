@@ -28,12 +28,11 @@ type User struct {
 
 	Password             string `json:"password,omitempty" db:"-"`
 	PasswordConfirmation string `json:"password_confirm,omitempty" db:"-"`
-	<%= if( len(fields) > 0) { %>
-		//Extra fields
-		<%= for (field) in fields { %> 
-		<%= field.Name.Proper() %> <%= field.GoType() %> `json:"<%= field.Name.Underscore() %>" db:"<%= field.Name.Underscore() %>"`
-		<% } %>
-	<% } %>
+<%= if( len(fields) > 0) { %>
+  //Plugin generated fields
+  <%= for (field) in fields { %> 
+  <%= field.Name.Proper() %> <%= field.GoType() %> `json:"<%= field.Name.Underscore() %>" db:"<%= field.Name.Underscore() %>"`<% } %>
+<% } %>
 }
 
 // String is not required by pop and may be deleted
