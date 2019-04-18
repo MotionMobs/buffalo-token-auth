@@ -53,5 +53,5 @@ release-test:
 
 release:
 	make tidy
-	release -y -f version.go
+	release -y -f tokenauth/version.go
 	make tidy

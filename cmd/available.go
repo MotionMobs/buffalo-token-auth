@@ -1,25 +1,15 @@
 package cmd
 
 import (
-	"encoding/json"
-	"os"
-
-	"github.com/gobuffalo/buffalo-plugins/plugins"
-	"github.com/spf13/cobra"
+	"github.com/gobuffalo/buffalo-plugins/plugins/plugcmds"
+	"mmgitl.mattclark.guru/buffalo-token-auth/tokenauth"
 )
 
-// availableCmd represents the available command
-var availableCmd = &cobra.Command{
-	Use:   "available",
-	Short: "a list of available buffalo plugins",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		plugs := plugins.Commands{
-			{Name: authCmd.Use, BuffaloCommand: "generate", Description: authCmd.Short, Aliases: []string{}},
-		}
-		return json.NewEncoder(os.Stdout).Encode(plugs)
-	},
-}
+var Available = plugcmds.NewAvailable()
 
 func init() {
-	RootCmd.AddCommand(availableCmd)
+	Available.Add("root", tokenauthCmd)
+	Available.Listen(tokenauth.Listen)
+	Available.Add("generate", generateCmd)
+	Available.Mount(rootCmd)
 }
