@@ -1,10 +1,8 @@
 package cmd
 
-import (
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
 
-// token-authCmd represents the buffalo-token-auth command
+// tokenauthCmd represents the buffalo-token-auth command
 var tokenauthCmd = &cobra.Command{
 	Use:   "buffalo-token-auth",
 	Short: "tools for working with token-auth",
