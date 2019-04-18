@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/gobuffalo/buffalo-plugins/plugins/plugcmds"
-	"mmgitl.mattclark.guru/buffalo-token-auth/tokenauth"
+	"mmgitl.mattclark.guru/MM/buffalo-token-auth/tokenauth"
 )
 
 var Available = plugcmds.NewAvailable()

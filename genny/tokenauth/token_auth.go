@@ -41,13 +41,8 @@ func extraAttrs(args []string) []string {
 	return result
 }
 
-type TokenAuthArgs struct {
-	UserFields []string
-	Prefix     string
-}
-
 // New
-func New(args TokenAuthArgs) (*genny.Generator, error) {
+func New(args *Options) (*genny.Generator, error) {
 	g := genny.New()
 
 	var err error

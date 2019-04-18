@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"mmgitl.mattclark.guru/buffalo-token-auth/tokenauth"
+	"mmgitl.mattclark.guru/MM/buffalo-token-auth/tokenauth"
 )
 
 // versionCmd represents the version command
