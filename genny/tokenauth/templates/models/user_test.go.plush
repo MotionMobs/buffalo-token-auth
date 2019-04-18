@@ -4,7 +4,7 @@ import (
   "<%= app.PackagePkg %>/models"
 )
 
-func (ms *ModelSuite) Test_User_Create() {
+func (ms *models.ModelSuite) Test_User_Create() {
 	count, err := ms.DB.Count("users")
 	ms.NoError(err)
 	ms.Equal(0, count)
@@ -26,7 +26,7 @@ func (ms *ModelSuite) Test_User_Create() {
 	ms.Equal(1, count)
 }
 
-func (ms *ModelSuite) Test_User_Create_ValidationErrors() {
+func (ms *models.ModelSuite) Test_User_Create_ValidationErrors() {
 	count, err := ms.DB.Count("users")
 	ms.NoError(err)
 	ms.Equal(0, count)
@@ -45,7 +45,7 @@ func (ms *ModelSuite) Test_User_Create_ValidationErrors() {
 	ms.Equal(0, count)
 }
 
-func (ms *ModelSuite) Test_User_Create_UserExists() {
+func (ms *models.ModelSuite) Test_User_Create_UserExists() {
 	count, err := ms.DB.Count("users")
 	ms.NoError(err)
 	ms.Equal(0, count)
