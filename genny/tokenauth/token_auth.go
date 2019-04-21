@@ -18,16 +18,23 @@ import (
 
 var fields attrs.Attrs
 
-func extraAttrs(args []string) []string {
+func extraAttrs(args []string) attrs.Attrs {
+	var extraAttrs attrs.Attrs
+
 	var names = map[string]string{
-		"email":    "email",
-		"password": "password",
-		"id":       "id",
+		"id":               "id",
+		"created_at":       "created_at",
+		"updated_at":       "updated_at",
+		"email":            "email",
+		"password_hash":    "password_hash",
+		"refresh_token":    "refresh_token",
+		"password":         "password",
+		"password_confirm": "password_confirm",
 	}
 
-	var result = []string{}
 	for _, field := range args {
 		attr, _ := attrs.Parse(field)
+
 		field = attr.Name.Underscore().String()
 
 		if names[field] != "" {
@@ -35,18 +42,18 @@ func extraAttrs(args []string) []string {
 		}
 
 		names[field] = field
-		result = append(result, field)
+		extraAttrs = append(extraAttrs, attr)
 	}
 
-	return result
+	return extraAttrs
 }
 
-// New
+// New generates and modifies files via plush and genny
 func New(args *Options) (*genny.Generator, error) {
 	g := genny.New()
 
 	var err error
-	fields, err = attrs.ParseArgs(extraAttrs(args.UserFields)...)
+	fields = extraAttrs(args.UserFields)
 	if err != nil {
 		return g, errors.WithStack(err)
 	}
