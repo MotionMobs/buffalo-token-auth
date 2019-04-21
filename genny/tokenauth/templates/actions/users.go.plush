@@ -1,0 +1,205 @@
+package actions
+
+import (
+	"database/sql"
+	"net/http"
+	"strings"
+
+	"<%= app.PackagePkg %>/helpers"
+	"<%= app.PackagePkg %>/models"
+
+	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/nulls"
+	"github.com/gobuffalo/pop"
+	"github.com/gobuffalo/validate"
+	"github.com/gofrs/uuid"
+	"github.com/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
+)
+
+// UsersError response packet for user requests
+type UsersError struct {
+	User  *models.User     `json:"user"`
+	VErrs *validate.Errors `json:"verrs"`
+	Error string           `json:"error"`
+}
+
+// UsersCreate registers a new user with the application.
+func UsersCreate(c buffalo.Context) error {
+	u := &models.User{}
+	ur := UsersError{}
+
+	if err := c.Bind(u); err != nil {
+		println("bad bind")
+		println(err.Error())
+		ur.Error = err.Error()
+		return c.Render(404, r.Auto(ur))
+	}
+
+	tx := c.Value("tx").(*pop.Connection)
+	verrs, err := u.Create(tx)
+	if err != nil {
+		println("bad user create")
+		ur.Error = err.Error()
+		return c.Render(404, r.Auto(ur))
+	}
+
+	if verrs.HasAny() {
+		println("bad validations")
+		u.Password = ""
+		u.PasswordConfirmation = ""
+		ur.User = u
+		ur.VErrs = verrs
+		return c.Render(404, r.Auto(ur))
+	}
+
+	ur.User = u
+	return c.Render(200, r.Auto(ur))
+}
+
+// UsersUpdate changes a User in the DB. This function is mapped to
+// the path PUT /users/{user_id}
+func UsersUpdate(c buffalo.Context) error {
+	// Get the DB connection from the context
+	tx, ok := c.Value("tx").(*pop.Connection)
+	if !ok {
+		return c.Error(500, errors.New("no transaction found"))
+	}
+
+	// Allocate an empty User
+	user := &models.User{}
+
+	if err := tx.Find(user, c.Param("user_id")); err != nil {
+		return c.Error(404, err)
+	}
+
+	// Bind User to the html form elements
+	if err := c.Bind(user); err != nil {
+		return c.Error(404, err)
+	}
+
+	if !user.CurrentOrAdmin(c) {
+		return c.Error(404, errors.New("can't update another user"))
+	}
+
+	verrs, err := user.Update(tx)
+	if err != nil {
+		return c.Error(404, err)
+	}
+
+	if verrs.HasAny() {
+		ur := UsersError{
+			User:  user,
+			VErrs: verrs,
+		}
+		return c.Render(422, r.Auto(ur))
+	}
+
+	return c.Render(200, r.Auto(c, user))
+}
+
+// UsersDestroy deletes a User from the DB. This function is mapped
+// to the path DELETE /users/{user_id}
+func UsersDestroy(c buffalo.Context) error {
+	// Get the DB connection from the context
+	tx, ok := c.Value("tx").(*pop.Connection)
+	if !ok {
+		return c.Error(500, errors.New("no transaction found"))
+	}
+
+	// Allocate an empty User
+	user := &models.User{}
+
+	// To find the User the parameter user_id is used.
+	if err := tx.Find(user, c.Param("user_id")); err != nil {
+		return c.Error(404, err)
+	}
+
+	if !user.CurrentOrAdmin(c) {
+		return c.Error(404, errors.New("can't delete another user"))
+	}
+
+	err := tx.Destroy(user)
+	if err != nil {
+		return c.Error(404, err)
+	}
+	return c.Render(200, r.Auto("success"))
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type BackendClaims struct {
+	RefreshToken string `json:"rt"`
+	Expiration   int64  `json:"accExp"`
+	jwt.StandardClaims
+}
+
+// UsersLogin default implementation.
+func UsersLogin(c buffalo.Context) error {
+	req := &LoginRequest{}
+
+	if err := c.Bind(req); err != nil {
+		return errors.WithStack(err)
+	}
+
+	tx := c.Value("tx").(*pop.Connection)
+	u := &models.User{}
+
+	// setup error function for later use
+	bad := func(msg string) error {
+		verrs := validate.NewErrors()
+		verrs.Add("email", "invalid email/password: "+msg)
+		c.Set("errors", verrs)
+		return c.Error(http.StatusUnprocessableEntity, verrs)
+	}
+
+	// check for empty password before anything else
+	pwd := req.Password
+	if len(pwd) == 0 {
+		return bad("bad password")
+	}
+
+	if err := tx.Where("email = ?", strings.TrimSpace(strings.ToLower(req.Email))).First(u); err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return bad("no user with that email")
+		}
+		return errors.WithStack(err)
+	}
+
+	// compare passwords
+	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(req.Password)); err != nil {
+		return bad("bad password")
+	}
+
+	if err := buildSetToken(c, u); err != nil {
+		return c.Error(http.StatusBadRequest, err)
+	}
+	return c.Render(200, r.Auto(u))
+}
+
+func buildSetToken(c buffalo.Context, u *models.User) error {
+	// check for refresh token
+	tx := c.Value("tx").(*pop.Connection)
+	if u.RefreshToken.UUID == uuid.Nil {
+		u.RefreshToken = nulls.NewUUID(uuid.Must(uuid.NewV4()))
+		verrs, err := u.Update(tx)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		if verrs.HasAny() {
+			return c.Render(400, r.Auto(verrs))
+		}
+	}
+
+	token, err := helpers.BuildJWT(u, 0)
+	if err != nil {
+		return err
+	}
+	helpers.SetToken(c, token)
+	c.Set("current_user", u)
+	return nil
+}
