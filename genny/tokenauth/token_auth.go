@@ -87,7 +87,7 @@ func New(args *Options) (*genny.Generator, error) {
 			`app.DELETE("/users/{user_id}/", UsersDestroy)`,
 			`app.POST("/signin", AuthCreate)`,
 			`app.DELETE("/signout", AuthDestroy)`,
-			`app.Middleware.Skip(middleware.TokenMiddleware, HomeHandler, UsersCreate, UsersLogin)`,
+			`app.Middleware.Skip(middleware.TokenMiddleware, HomeHandler, UsersCreate, AuthCreate)`,
 		)
 		return r.File(gf)
 	})
