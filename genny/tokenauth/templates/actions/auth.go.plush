@@ -54,13 +54,13 @@ func AuthCreate(c buffalo.Context) error {
 		return bad("bad password")
 	}
 
-	if err := buildSetToken(c, u); err != nil {
+	if err := BuildSetToken(c, u); err != nil {
 		return c.Error(http.StatusBadRequest, err)
 	}
-	return c.Render(200, r.Auto(u))
+	return c.Render(200, r.Auto(c, u))
 }
 
-func buildSetToken(c buffalo.Context, u *models.User) error {
+func BuildSetToken(c buffalo.Context, u *models.User) error {
 	// check for refresh token
 	tx := c.Value("tx").(*pop.Connection)
 	if u.RefreshToken.UUID == uuid.Nil {
@@ -70,15 +70,15 @@ func buildSetToken(c buffalo.Context, u *models.User) error {
 			return errors.WithStack(err)
 		}
 		if verrs.HasAny() {
-			return c.Render(400, r.Auto(verrs))
+			return c.Render(400, r.Auto(c, verrs))
 		}
 	}
 
-	token, err := helpers.BuildJWT(u, 0)
+	token, err := middleware.BuildJWT(u, 0)
 	if err != nil {
 		return err
 	}
-	helpers.SetToken(c, token)
+	middleware.SetToken(c, token)
 	c.Set("current_user", u)
 	return nil
 }
@@ -92,6 +92,6 @@ func AuthDestroy(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 	tx.Save(u)
 
-	helpers.SetToken(c, "")
-	return c.Render(200, r.Auto("success"))
+	middleware.SetToken(c, "")
+	return c.Render(200, r.Auto(c, "success"))
 }
