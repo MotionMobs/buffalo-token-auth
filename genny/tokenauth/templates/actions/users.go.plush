@@ -1,21 +1,12 @@
 package actions
 
 import (
-	"database/sql"
-	"net/http"
-	"strings"
-
-	"<%= app.PackagePkg %>/helpers"
 	"<%= app.PackagePkg %>/models"
 
-	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop"
 	"github.com/gobuffalo/validate"
-	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // UsersError response packet for user requests
