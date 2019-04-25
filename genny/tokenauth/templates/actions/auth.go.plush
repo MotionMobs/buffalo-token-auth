@@ -2,12 +2,17 @@ package actions
 
 import (
 	"database/sql"
+  "net/http"
 	"strings"
 
+  "<%= app.PackagePkg %>/middleware"
 	"<%= app.PackagePkg %>/models"
+  
 	"github.com/gobuffalo/buffalo"
+  "github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop"
 	"github.com/gobuffalo/validate"
+  "github.com/gofrs/uuid"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
