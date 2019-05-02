@@ -7,7 +7,7 @@ import (
 	"github.com/gobuffalo/genny/movinglater/gotools"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"mmgitl.mattclark.guru/MM/buffalo-token-auth/genny/tokenauth"
+	"github.com/MotionMobs/buffalo-token-auth/genny/tokenauth"
 )
 
 var generateOptions = struct {

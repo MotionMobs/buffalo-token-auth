@@ -1,4 +1,4 @@
-module mmgitl.mattclark.guru/MM/buffalo-token-auth
+module github.com/MotionMobs/buffalo-token-auth
 
 go 1.12
 

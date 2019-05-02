@@ -5,4 +5,4 @@
 // and any other packr generated files.
 package tokenauth
 
-import _ "mmgitl.mattclark.guru/MM/buffalo-token-auth/packrd"
+import _ "github.com/MotionMobs/buffalo-token-auth/packrd"
