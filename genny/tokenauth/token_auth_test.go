@@ -3,7 +3,7 @@ package tokenauth
 import (
 	"testing"
 
-	"github.com/gobuffalo/genny/gentest"
+	"github.com/gobuffalo/genny/v2/gentest"
 	"github.com/stretchr/testify/require"
 )
 

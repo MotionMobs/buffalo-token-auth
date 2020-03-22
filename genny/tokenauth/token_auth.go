@@ -5,14 +5,13 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/gobuffalo/gogen"
+	"github.com/gobuffalo/genny/v2/gogen"
 
 	"github.com/gobuffalo/attrs"
-	"github.com/gobuffalo/genny"
+	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/meta"
 	"github.com/gobuffalo/packr/v2"
-	"github.com/gobuffalo/plush"
-	"github.com/gobuffalo/plushgen"
+	"github.com/gobuffalo/plush/v4"
 	"github.com/pkg/errors"
 )
 
@@ -68,7 +67,7 @@ func New(args *Options) (*genny.Generator, error) {
 	ctx.Set("fields", fields)
 	ctx.Set("token_prefix", args.Prefix)
 
-	g.Transformer(plushgen.Transformer(ctx))
+	g.Transformer(plushTransformer(ctx))
 	g.Transformer(genny.NewTransformer(".fizz", migrationsTransformer(time.Now())))
 
 	g.RunFn(func(r *genny.Runner) error {
@@ -101,4 +100,17 @@ func migrationsTransformer(t time.Time) genny.TransformerFn {
 		p := filepath.Base(f.Name())
 		return genny.NewFile(filepath.Join("migrations", fmt.Sprintf("%s_%s", v, p)), f), nil
 	}
+}
+
+// Transformer will plushify any file that has a ".plush" extension
+func plushTransformer(ctx *plush.Context) genny.Transformer {
+	t := genny.NewTransformer(".plush", func(f genny.File) (genny.File, error) {
+		s, err := plush.RenderR(f, ctx)
+		if err != nil {
+			return f, errors.Wrap(err, f.Name())
+		}
+		return genny.NewFileS(f.Name(), s), nil
+	})
+	t.StripExt = true
+	return t
 }
