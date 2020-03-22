@@ -2,7 +2,6 @@ package tokenauth
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/gobuffalo/genny/v2"
@@ -14,12 +13,12 @@ func Test_New(t *testing.T) {
 
 	run := genny.DryRunner(context.Background())
 	g := genny.New()
-	g.File(genny.NewFile("actions/app.go", strings.NewReader(appBefore)))
+	g.File(genny.NewFileS("actions/app.go", (appBefore)))
 	run.With(g)
 
-	g, err := New(&Options{})
+	gg, err := New(&Options{})
 	r.NoError(err)
-	run.With(g)
+	run.With(gg)
 
 	r.NoError(run.Run())
 
