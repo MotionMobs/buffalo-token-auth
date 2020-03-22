@@ -34,6 +34,24 @@ func Test_New(t *testing.T) {
 
 	f = res.Files[1]
 	r.Equal("actions/auth.go", f.Name())
+
+	f = res.Files[2]
+	r.Equal("actions/users.go", f.Name())
+
+	f = res.Files[3]
+	r.Equal("middleware/token_middleware.go", f.Name())
+
+	f = res.Files[4]
+	r.Contains(f.Name(), "_create_users.down.fizz")
+
+	f = res.Files[5]
+	r.Contains(f.Name(), "_create_users.up.fizz")
+
+	f = res.Files[6]
+	r.Equal("models/user.go", f.Name())
+
+	f = res.Files[7]
+	r.Equal("models/user_test.go", f.Name())
 }
 
 const appBefore = `package actions
