@@ -9,6 +9,7 @@ import (
 
 	"github.com/gobuffalo/attrs"
 	"github.com/gobuffalo/genny/v2"
+	"github.com/gobuffalo/genny/v2/plushgen"
 	"github.com/gobuffalo/meta"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gobuffalo/plush/v4"
@@ -67,7 +68,7 @@ func New(args *Options) (*genny.Generator, error) {
 	ctx.Set("fields", fields)
 	ctx.Set("token_prefix", args.Prefix)
 
-	g.Transformer(plushTransformer(ctx))
+	g.Transformer(plushgen.Transformer(ctx))
 	g.Transformer(genny.NewTransformer(".fizz", migrationsTransformer(time.Now())))
 
 	g.RunFn(func(r *genny.Runner) error {
