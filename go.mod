@@ -1,9 +1,9 @@
 module github.com/MotionMobs/buffalo-token-auth
 
-go 1.12
+go 1.13
 
 require (
-	github.com/gobuffalo/attrs v0.0.0-20190224210810-a9411de4debd
+	github.com/gobuffalo/attrs v1.0.0
 	github.com/gobuffalo/buffalo-plugins v1.14.1
 	github.com/gobuffalo/events v1.3.1
 	github.com/gobuffalo/genny/v2 v2.0.5
@@ -14,7 +14,7 @@ require (
 	github.com/gobuffalo/plushgen v0.0.0-20190329152458-0555238fe0d9
 	github.com/gobuffalo/tags v2.1.0+incompatible // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v0.0.3
 	github.com/stretchr/testify v1.4.0
 )
