@@ -14,7 +14,7 @@ func Test_New(t *testing.T) {
 
 	run := genny.DryRunner(context.Background())
 	g := genny.New()
-	appPath := filepath.FromSlash("actions/app.go")
+	appPath := filepath.Join("actions", "app.go")
 	g.File(genny.NewFileS(appPath, (appBefore)))
 	run.With(g)
 
