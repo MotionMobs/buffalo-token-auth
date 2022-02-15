@@ -15,6 +15,10 @@ TODO: Description
 $ go get -u -v github.com/MotionMobs/buffalo-token-auth
 ```
 
+```bash
+buffalo plugins install github.com/MotionMobs/buffalo-token-auth
+```
+
 ## Usage
 
 ```bash
