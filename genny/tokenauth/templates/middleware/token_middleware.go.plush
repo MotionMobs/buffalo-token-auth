@@ -12,7 +12,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/pop"
+	"github.com/gobuffalo/pop/v6"
 
 	"<%= app.PackagePkg %>/models"
 
